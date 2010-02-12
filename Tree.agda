@@ -2,6 +2,8 @@ module Tree where
 
 open import Data.Nat
 open import Data.Maybe
+open import Data.Product
+open import Data.Bool
 
 data Direction : Set where
   left : Direction
@@ -33,8 +35,20 @@ insert x t with insertTree x t
 ... | nothing = insertFullTree x t
 ... | just t′ = t′
 
+fullToBalanced : ∀ {a} → Tree a → Tree a
+fullToBalanced leaf = leaf
+fullToBalanced (branch _ a l r) = branch right a l (fullToBalanced r)
+
+delete₁ : ∀ {a} → Direction → a → Tree a → Tree a → Bool × Tree a
+delete₁ right _ _ leaf = true , leaf
+delete₁ right a l (branch d' a' l' r') with delete₁ d' a' l' r'
+... | false , r = false , branch right a l r
+... | true  , r = false , branch left  a (fullToBalanced l) r
+delete₁ left  a (branch d' a' l' r') r with delete₁ d' a' l' r'
+... | false , l = false , branch left  a l r
+... | true  , l = true  , branch right a l r
+delete₁ _ _ _ _ = true , leaf -- this never happens on good inputs
+
 delete : ∀ {a} → Tree a → Maybe (Tree a)
 delete leaf = nothing
-delete (branch _ a' leaf leaf) = just leaf
-delete (branch left a' t₁ t₂) = {!!}
-delete (branch right a' t₁ t₂) = {!!}
+delete (branch d a l r) = just (proj₂ (delete₁ d a l r))
