@@ -32,3 +32,9 @@ insert : ∀ {a} → a → Tree a → Tree a
 insert x t with insertTree x t
 ... | nothing = insertFullTree x t
 ... | just t′ = t′
+
+delete : ∀ {a} → Tree a → Maybe (Tree a)
+delete leaf = nothing
+delete (branch _ a' leaf leaf) = just leaf
+delete (branch left a' t₁ t₂) = {!!}
+delete (branch right a' t₁ t₂) = {!!}
